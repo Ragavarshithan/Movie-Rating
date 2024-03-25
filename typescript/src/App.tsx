@@ -5,7 +5,7 @@ import Home from './pages/Home';
 import { BrowserRouter, Navigate, Route,Routes } from 'react-router-dom';
 import {Header}  from './component/Header';
 import AddMovie from './component/AddMovie';
-import { Update } from './component/Update';
+import Update from './component/Update';
 
 function App() {
   return (

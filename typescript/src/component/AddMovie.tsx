@@ -167,13 +167,13 @@
 // export default AddMovie
 
 import React from 'react';
-import { Formik, Form, Field, ErrorMessage, FormikValues, FormikHelpers } from 'formik';
+import { Link, useNavigate } from 'react-router-dom';
+import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 import axios from 'axios';
-import { Link, useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.css';
 
-interface FormValues {
+interface AddMovieFormValues {
   movName: string;
   castList: string;
   director: string;
@@ -182,13 +182,13 @@ interface FormValues {
   storyLine: string;
   genre: string;
   releaseDate: string;
-  rating: number;
+  rating: string;
 }
 
-const AddMovie = () => {
+const AddMovie: React.FC = () => {
   const navigate = useNavigate();
 
-  const initialValues: FormValues = {
+  const initialValues: AddMovieFormValues = {
     movName: '',
     castList: '',
     director: '',
@@ -197,7 +197,7 @@ const AddMovie = () => {
     storyLine: '',
     genre: '',
     releaseDate: '',
-    rating: 0
+    rating: '',
   };
 
   const validationSchema = Yup.object().shape({
@@ -216,39 +216,24 @@ const AddMovie = () => {
     .required('Rating is required'),
   });
 
-  const handleSubmit = async (values: FormValues, { setSubmitting }: FormikHelpers<FormValues>) => {
-    try {
-      // Convert the image to base64
-      const reader = new FileReader();
-      reader.readAsDataURL(values.image!);
-      reader.onloadend = () => {
-        const base64Image = reader.result as string;
+  const saveMovie = async (values: AddMovieFormValues) => {
+    const { movName, castList, director, language, image, storyLine, genre, releaseDate, rating } = values;
 
-        // Send the base64 image string along with other form data
-        axios
-          .post('http://localhost:8080/movies/add', {
-            movName: values.movName,
-            castList: values.castList,
-            director: values.director,
-            language: values.language,
-            imageUrl: base64Image,
-            storyLine: values.storyLine,
-            genre: values.genre,
-            releaseDate: values.releaseDate,
-            rating: values.rating,
-          })
-          .then((response) => {
-            console.log(response);
-            navigate(`/movies/view/${response.data.id}`);
-          })
-          .catch((error) => {
-            console.error(error);
-          });
-      };
+    try {
+      const response = await axios.post('http://localhost:8080/movies/add', {
+        movName,
+        castList,
+        director,
+        language,
+        storyLine,
+        genre,
+        releaseDate,
+        rating,
+      });
+      console.log(response);
+      navigate(`/movies/view/${response.data.id}`);
     } catch (error) {
       console.error(error);
-    } finally {
-      setSubmitting(false);
     }
   };
 
@@ -264,21 +249,19 @@ const AddMovie = () => {
               <Formik
                 initialValues={initialValues}
                 validationSchema={validationSchema}
-                onSubmit={handleSubmit}
+                onSubmit={(values) => saveMovie(values)}
               >
-                {({ isSubmitting }) => (
-                  <Form>
-                    <div className='form-group mb-2'>
-                      <label className='form-label'>Movie Name :</label>
-                      <Field
-                        type='text'
-                        placeholder='MovieName'
-                        name='movName'
-                        className='form-control'
-                      />
-                      <ErrorMessage name='movName' component='div' className='text-danger' />
+                <Form>
+                  <div className='form-group mb-2'>
+                    <label className='form-label'>Movie Name :</label>
+                    <Field 
+                    type='text'
+                    placeholder='Movie'
+                    name='movName'
+                    className='form-control' />
+                    <ErrorMessage name='movName' component='div' className='text-danger' />
 
-                      <label className='form-label'>Cast :</label>
+                    <label className='form-label'>Cast :</label>
                       <Field
                         type='text'
                         placeholder='Cast list'
@@ -313,7 +296,7 @@ const AddMovie = () => {
                       <Field
                         type='text'
                         placeholder='Storyline'
-                        name='storyline'
+                        name='storyLine'
                         className='form-control'
                       />
                       <ErrorMessage name='storyline' component='div' className='text-danger' />
@@ -331,7 +314,7 @@ const AddMovie = () => {
                       <Field
                         type='date'
   
-                        name='releasedate'
+                        name='releaseDate'
                         className='form-control'
                       />
                       <ErrorMessage name='releasedate' component='div' className='text-danger' />
@@ -345,23 +328,14 @@ const AddMovie = () => {
                       />
                       <ErrorMessage name='rating' component='div' className='text-danger' />
 
-                      <div className='col-md-6 d-flex justify-content-md-end align-items-end'>
-                        {/* "Save" button */}
-                        <button
-                          type='submit'
-                          className='btn btn-success'
-                          disabled={isSubmitting}
-                        >
-                          Save
-                        </button>
-                        {/* "Cancel" button */}
-                        <Link to='/movies/view/' className='btn btn-danger ms-2'>
-                          Cancel
-                        </Link>
-                      </div>
+                    <div className="col-md-6 d-flex justify-content-md-end align-items-end">
+                      {/* "Save" button */}
+                      <button type="submit" className='btn btn-success'>Save</button>
+                      {/* "Cancel" button */}
+                      <Link to="/movies/view/" className='btn btn-danger ms-2'>Cancel</Link>
                     </div>
-                  </Form>
-                )}
+                  </div>
+                </Form>
               </Formik>
             </div>
           </div>
@@ -372,3 +346,4 @@ const AddMovie = () => {
 };
 
 export default AddMovie;
+
